@@ -10,7 +10,7 @@ Or from source:
 
 <pre>
   git clone git://github.com/allex/fs-x.git 
-  cd fs-ext
+  cd fs-x
   npm link
 </pre>
 
