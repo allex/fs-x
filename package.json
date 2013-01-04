@@ -1,0 +1,30 @@
+{
+  "name": "fs-x",
+  "description": "Extenssions for native fs module.",
+  "version": "1.0.0",
+  "author": {
+    "name": "Allex Wang",
+    "email": "allex.wxn@gmail.com"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/allex/fs-x.git"
+  },
+  "bugs": {
+    "url": "https://github.com/allex/fs-x/issues"
+  },
+  "engines": [
+    "node >= 0.3.6"
+  ],
+  "main": "./index.js",
+  "dependencies": {
+    "ncp": "0.2.x",
+    "jsonfile": "0.0.x"
+  },
+  "bundleDependencies": [
+  ],
+  "scripts": {
+  },
+  "readme": "# fs-x -- Extenssions for native fs module.\n\n## Install\n\n<pre>\n  npm install fs-x\n</pre>\n\nOr from source:\n\n<pre>\n  git clone git://github.com/allex/fs-x.git \n  cd fs-x\n  npm link\n</pre>\n",
+  "readmeFilename": "README.md"
+}
