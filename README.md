@@ -1,4 +1,7 @@
-# fs-x -- Extenssions for native fs module.
+# fs-x
+
+A plus module with extenssions for native fs. This library exports everything from
+node's fs module but with some extra helpers.
 
 ## Install
 

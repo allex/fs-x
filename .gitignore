@@ -1,4 +1,6 @@
+.DS_Store
+npm-debug.log
 .*.swp
 .vim
 .tmp
-node_modules/
+/node_modules

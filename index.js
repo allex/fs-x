@@ -4,87 +4,113 @@
  *
  * @author Allex Wang (allex.wxn@gmail.com)
  */
-var fs = require('fs'),
-    path = require('path'),
-    crypto = require('crypto');
+var fs = require('fs')
+  , path = require('path')
+  , crypto = require('crypto')
+  , util = require('util')
+  , walker = require('./lib/walker')
+  , mkdirp = require('./lib/mkdirp')
+  , remove = require('./lib/remove')
+  , cp = require('./lib/copy')
+  , jsonFile = require('jsonfile')
 
-// directory walkers
-var walker = require('./lib/walker');
-fs.walk = walker.walk;
-fs.find = walker.find;
-fs.tree = walker.tree;
-
-// offers functionality similar to mkdir -p
-var mkdirp = require('./lib/mkdirp');
-fs.md =
-fs.mkdir = mkdirp.mkdir;
-fs.mkdirSync = mkdirp.mkdirSync;
-
-// remove file or directory.
-var remove = require('./lib/remove');
-fs.rm = remove.rm;
-fs.rmSync = remove.rmSync;
-
-// copy
-var cp = require('./lib/copy');
-fs.copy = cp.copy;
-fs.copyFileSync = cp.copyFileSync;
-
-// jsonfile utilities
-var jsonFile = require('jsonfile');
 jsonFile.spaces = 0; // disable json beatify
-fs.readJSONFile = jsonFile.readFile;
-fs.readJSONFileSync = jsonFile.readFileSync;
-fs.writeJSONFile = jsonFile.writeFile;
-fs.writeJSONFileSync = jsonFile.writeFileSync;
+
+function extend(r, s) {
+  var args = [].slice.call(arguments, 1), l = args.length
+  while (l--) {
+    util._extend(r, args[l])
+  }
+  return r
+}
+
+var fsPlus = {
+
+  // directory walkers
+  walk: walker.walk,
+  find: walker.find,
+  tree: walker.tree,
+
+  // offers functionality similar to mkdir -p
+  mkdir: mkdirp.mkdir,
+  mkdirSync: mkdirp.mkdirSync,
+
+  // remove file or directory.
+  rm: remove.rm,
+  rmSync: remove.rmSync,
+
+  /**
+   * Asynchronous recursive file & directory copying
+   * @method copy
+   */
+  copy: cp.copy,
+
+  /**
+   * Sync copy file, auto fix the dist directory exists.
+   * @method copyFileSync
+   */
+  copyFileSync: cp.copyFileSync,
+
+  /** JSON utilities */
+  readJSONFile: jsonFile.readFile,
+  readJSONFileSync: jsonFile.readFileSync,
+  writeJSONFile: jsonFile.writeFile,
+  writeJSONFileSync: jsonFile.writeFileSync,
+
+  /**
+   * Get sha1sum of a file.
+   * @param {String} file The specified file path to calculate.
+   */
+  sha1sumSync: function(file) {
+    var data = fs.readFileSync(file);
+    if (data) {
+      return crypto.createHash('sha1').update(data).digest('hex');
+    }
+    return null;
+  },
+
+  /**
+   * Combine files to a single file.
+   * @param {Array} files The file list to combine.
+   * @param {String} outfile The output file path.
+   */
+  combineSync: function(files, outfile) {
+      var ret = '';
+      files.forEach(function(f) {
+          if (fs.existsSync(f)) {
+              ret += fs.readFileSync(f);
+          } else {
+              console.error('file "' + f + '" not exists');
+          }
+      });
+      fs.writeFileSync(outfile, ret);
+  }
+
+};
 
 /**
  * Fix writeFile, writeFileSync with sub directories.
  * @overrides
  */
 ['writeFile', 'writeFileSync'].forEach(function(name) {
-    var fsFn = fs[name];
-    fs[name] = function(filename) {
+    fsPlus[name] = function(filename) {
         var dir = path.dirname(path.normalize(filename));
         if (dir === '.') dir = '';
         if (dir && !fs.existsSync(dir)) {
             fs.mkdirSync(dir);
         }
-        return fsFn.apply(fs, arguments);
+        return fs[name].apply(fs, arguments);
     };
 });
 
-// get sha1sum of a file.
-fs.sha1sumSync = function(file) {
-    var data = fs.readFileSync(file);
-    if (data) {
-        return crypto.createHash('sha1').update(data).digest('hex');
-    }
-    return null;
-};
+// alias md => mkdir
+fsPlus.md = fsPlus.mkdir;
 
-/**
- * Combine files to a single file.
- * @param {Array} files The file list to combine.
- * @param {String} outfile The output file path.
- */
-fs.combineSync = function(files, outfile) {
-    var ret = '';
-    files.forEach(function(f) {
-        if (fs.existsSync(f)) {
-            ret += fs.readFileSync(f);
-        } else {
-            console.error('file "' + f + '" not exists');
-        }
-    });
-    fs.writeFileSync(outfile, ret);
-};
-
-// make compatible for Node v0.8
+// fix native `fs` make compatible for Node v0.8
 if (typeof fs.exists == 'undefined')
     fs.exists = path.exists;
 if (typeof fs.existsSync == 'undefined')
     fs.existsSync = path.existsSync;
 
 // Exports
-module.exports = fs;
+module.exports = extend({}, fs, fsPlus);
