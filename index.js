@@ -84,6 +84,24 @@ var fsPlus = {
           }
       });
       fs.writeFileSync(outfile, ret);
+  },
+
+  isFile: function(f) {
+    try {
+      var stat = fs.statSync(f)
+      return stat.isFile()
+    } catch (e) {
+      return false
+    }
+  },
+
+  isDirectory: function(d) {
+    try {
+      var stat = fs.statSync(d)
+      return stat.isDirectory()
+    } catch (e) {
+      return false
+    }
   }
 
 };
