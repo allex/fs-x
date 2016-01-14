@@ -4,3 +4,4 @@ npm-debug.log
 .vim
 .tmp
 /node_modules
+test

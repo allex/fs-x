@@ -10,14 +10,14 @@ var fs = require('fs')
   , util = require('util')
   , walker = require('./lib/walker')
   , mkdirp = require('./lib/mkdirp')
-  , remove = require('./lib/remove')
+  , rm = require('./lib/rm')
   , cp = require('./lib/copy')
   , jsonFile = require('jsonfile')
 
 jsonFile.spaces = 0; // disable json beatify
 
 function extend(r, s) {
-  var args = [].slice.call(arguments, 1), l = args.length
+  var args = [].slice.call(arguments, 1).reverse(), l = args.length
   while (l--) {
     util._extend(r, args[l])
   }
@@ -26,18 +26,18 @@ function extend(r, s) {
 
 var fsPlus = {
 
-  // directory walkers
+  // Directory walker helpers
   walk: walker.walk,
   find: walker.find,
   tree: walker.tree,
 
-  // offers functionality similar to mkdir -p
-  mkdir: mkdirp.mkdir,
-  mkdirSync: mkdirp.mkdirSync,
+  // Recursively mkdir, like `mkdir -p`
+  mkdir: mkdirp,
+  mkdirSync: mkdirp.sync,
 
-  // remove file or directory.
-  rm: remove.rm,
-  rmSync: remove.rmSync,
+  // rm file or directory.
+  rm: rm.rm,
+  rmSync: rm.rmSync,
 
   /**
    * Asynchronous recursive file & directory copying
@@ -75,15 +75,15 @@ var fsPlus = {
    * @param {String} outfile The output file path.
    */
   combineSync: function(files, outfile) {
-      var ret = '';
-      files.forEach(function(f) {
-          if (fs.existsSync(f)) {
-              ret += fs.readFileSync(f);
-          } else {
-              console.error('file "' + f + '" not exists');
-          }
-      });
-      fs.writeFileSync(outfile, ret);
+    var ret = '';
+    files.forEach(function(f) {
+      if (fs.existsSync(f)) {
+        ret += fs.readFileSync(f);
+      } else {
+        console.error('file "' + f + '" not exists');
+      }
+    });
+    fsPlus.writeFileSync(outfile, ret);
   },
 
   isFile: function(f) {
@@ -111,14 +111,14 @@ var fsPlus = {
  * @overrides
  */
 ['writeFile', 'writeFileSync'].forEach(function(name) {
-    fsPlus[name] = function(filename) {
-        var dir = path.dirname(path.normalize(filename));
-        if (dir === '.') dir = '';
-        if (dir && !fs.existsSync(dir)) {
-            fs.mkdirSync(dir);
-        }
-        return fs[name].apply(fs, arguments);
-    };
+  fsPlus[name] = function(filename) {
+    var dir = path.dirname(path.normalize(filename));
+    if (dir === '.') dir = '';
+    if (dir && !fs.existsSync(dir)) {
+      mkdirp.sync(dir);
+    }
+    return fs[name].apply(fs, arguments);
+  };
 });
 
 // alias md => mkdir
@@ -126,9 +126,11 @@ fsPlus.md = fsPlus.mkdir;
 
 // fix native `fs` make compatible for Node v0.8
 if (typeof fs.exists == 'undefined')
-    fs.exists = path.exists;
+  fs.exists = path.exists;
 if (typeof fs.existsSync == 'undefined')
-    fs.existsSync = path.existsSync;
+  fs.existsSync = path.existsSync;
 
-// Exports
+// Exports, extends from native fs.*
 module.exports = extend({}, fs, fsPlus);
+
+// vim: set fdm=marker ts=2 sw=2 sts=2 tw=85 et :
