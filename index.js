@@ -13,6 +13,7 @@ var fs = require('fs')
   , rm = require('./lib/rm')
   , cp = require('./lib/copy')
   , jsonFile = require('jsonfile')
+  , version = require('./package').version
 
 jsonFile.spaces = 0; // disable json beatify
 
@@ -25,6 +26,9 @@ function extend(r, s) {
 }
 
 var fsPlus = {
+
+  // fs release tag
+  version: version,
 
   // Directory walker helpers
   walk: walker.walk,

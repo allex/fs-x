@@ -1,7 +1,7 @@
 {
   "name": "fs-x",
   "description": "A plus module with extenssions for native fs",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "author": {
     "name": "Allex Wang",
     "email": "allex.wxn@gmail.com"
@@ -28,6 +28,7 @@
   ],
   "scripts": {
   },
+  "license": "BSD-2-Clause",
   "readme": "# fs-x -- Extenssions for native fs module.\n\n## Install\n\n<pre>\n  npm install fs-x\n</pre>\n\nOr from source:\n\n<pre>\n  git clone git://github.com/allex/fs-x.git \n  cd fs-x\n  npm link\n</pre>\n",
   "readmeFilename": "README.md"
 }
